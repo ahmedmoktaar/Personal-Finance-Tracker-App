@@ -7,6 +7,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useEffect } from "react";
 import { sortDescendingValues } from "../utils/sortDescendingValues";
 import { Picker } from "@react-native-picker/picker";
+import { TotalMoneyForCurrentMonth } from "../utils/calculateTotalMoney";
 
 const HomePage = () => {
   const [isModalVisible, setIsModalVisible] = useState(false);
@@ -32,6 +33,7 @@ const HomePage = () => {
 
         setTransactions(sortedValues);
         setOriginalTransactions(sortedValues);
+        TotalMoneyForCurrentMonth(sortedValues); 
       }
     } catch (e) {
       console.error(e);
@@ -69,9 +71,16 @@ const HomePage = () => {
     fetchData();
   }, [isModalVisible]);
 
+  const TotalExpenseForCurrentMonth = TotalMoneyForCurrentMonth(transactions, "expense");
+  const TotalIncomeForCurrentMonth = TotalMoneyForCurrentMonth(transactions, "income");
+
+  
+
   return (
     <View>
       <Text>Welcome to Personal Finance Tracker</Text>
+      <Text>{TotalExpenseForCurrentMonth}</Text>
+      <Text>{TotalIncomeForCurrentMonth}</Text>
 
       <Ionicons name="add-circle" size={24} color="black" onPress={handleModalVibility} />
 
@@ -90,14 +99,6 @@ const HomePage = () => {
           <Picker.Item label="income" value="income" />
           <Picker.Item label="expense" value="expense" />
         </Picker>
-        <Ionicons
-          name="filter"
-          size={24}
-          color="black"
-          onPress={() => {
-            /* Implement type filter logic */
-          }}
-        />
       </View>
 
       <FlatList data={transactions} renderItem={({ item }) => <Card transaction={item} />} />
