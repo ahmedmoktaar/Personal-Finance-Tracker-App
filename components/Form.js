@@ -26,7 +26,7 @@ const saveData = async (values) => {
     const key = generateUniqueKey(values);
     const jsonValue = JSON.stringify(values);
     await AsyncStorage.setItem(key, jsonValue);
-    console.log("Data successfully saved", key, jsonValue);
+    console.log("Data successfully saved");
   } catch (e) {
     console.error("Failed to save data", e);
   }
@@ -41,7 +41,6 @@ const Form = ({setIsModalVisible}) => {
       initialValues={{ type: "income", amount: 0, category: "", date: 0, description: "" }}
       validationSchema={FormSchema}
       onSubmit={(values) => {
-        console.log(values);
         saveData(values);
         handleCloseModal();
       }}
