@@ -10,19 +10,31 @@ import { Picker } from "@react-native-picker/picker";
 import { TotalMoneyForCurrentMonth } from "../utils/calculateTotalMoney";
 
 const HomePage = () => {
+  // State to manage modal visibility
   const [isModalVisible, setIsModalVisible] = useState(false);
+  // State to store transactions
   const [transactions, setTransactions] = useState([]);
-  const [OriginalTransactions, setOriginalTransactions] = useState();
+  // State to store original transactions for filtering/sorting
+  const [originalTransactions, setOriginalTransactions] = useState([]);
+  // State to store the selected filter type
   const [filterType, setFilterType] = useState("");
+  // State to store the selected sort type
   const [sortType, setSortType] = useState("");
-  const handleModalVibility = () => {
+
+  // Calculate total expense for the current month
+  const totalExpenseForCurrentMonth = TotalMoneyForCurrentMonth(transactions, "expense");
+  // Calculate total income for the current month
+  const totalIncomeForCurrentMonth = TotalMoneyForCurrentMonth(transactions, "income");
+
+  // Function to handle modal visibility
+  const handleModalVisibility = () => {
     setIsModalVisible(true);
   };
 
+  // Function to fetch data from AsyncStorage
   const fetchData = async () => {
     try {
       const keys = await AsyncStorage.getAllKeys();
-
       if (keys.length > 0) {
         const valuesArray = await AsyncStorage.multiGet(keys);
         const values = valuesArray.map(([key, value]) => ({
@@ -30,59 +42,54 @@ const HomePage = () => {
           ...JSON.parse(value),
         }));
         const sortedValues = sortDescendingValues(values);
-
         setTransactions(sortedValues);
         setOriginalTransactions(sortedValues);
-        TotalMoneyForCurrentMonth(sortedValues); 
+        TotalMoneyForCurrentMonth(sortedValues);
       }
     } catch (e) {
       console.error(e);
     }
   };
+
+  // Function to handle sorting by date
   const handleSortByDate = (type) => {
     setSortType(type);
     setFilterType("");
 
     if (type === "ascending") {
-      sortDescendingValues(OriginalTransactions);
+      sortDescendingValues(originalTransactions);
     } else if (type === "descending") {
-      const sortedValues = OriginalTransactions.reverse();
+      const sortedValues = originalTransactions.reverse();
       setTransactions(sortedValues);
     } else {
-      setTransactions(OriginalTransactions);
+      setTransactions(originalTransactions);
     }
   };
 
+  // Function to handle sorting by type (income/expense)
   const handleSortByType = (type) => {
     setFilterType(type);
     setSortType("");
-    if (type === "income") {
-      const filteredValues = OriginalTransactions.filter((transaction) => transaction.type === "income");
-      setTransactions(filteredValues);
-    } else if (type === "expense") {
-      const filteredValues = OriginalTransactions.filter((transaction) => transaction.type === "expense");
+    if (type) {
+      const filteredValues = originalTransactions.filter((transaction) => transaction.type === type);
       setTransactions(filteredValues);
     } else {
-      setTransactions(OriginalTransactions);
+      setTransactions(originalTransactions);
     }
   };
 
+  // Fetch data when the component mounts or modal visibility changes
   useEffect(() => {
     fetchData();
   }, [isModalVisible]);
 
-  const TotalExpenseForCurrentMonth = TotalMoneyForCurrentMonth(transactions, "expense");
-  const TotalIncomeForCurrentMonth = TotalMoneyForCurrentMonth(transactions, "income");
-
-  
-
   return (
     <View>
       <Text>Welcome to Personal Finance Tracker</Text>
-      <Text>{TotalExpenseForCurrentMonth}</Text>
-      <Text>{TotalIncomeForCurrentMonth}</Text>
+      <Text>{totalExpenseForCurrentMonth}</Text>
+      <Text>{totalIncomeForCurrentMonth}</Text>
 
-      <Ionicons name="add-circle" size={24} color="black" onPress={handleModalVibility} />
+      <Ionicons name="add-circle" size={24} color="black" onPress={handleModalVisibility} />
 
       <Modal visible={isModalVisible} animationType="slide">
         <Form setIsModalVisible={setIsModalVisible} />
