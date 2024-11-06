@@ -6,7 +6,6 @@ The Personal Finance Tracker App is designed to help users manage their finances
 ## Features
 - Track income and expenses
 - Categorize transactions
-- Filter transactions by date or transaction type 
 
 ## Installation
 1. Clone the repository:
@@ -41,8 +40,10 @@ The development of this application took in range of 8 hours.
 To further enhance the application, the following features could be added:
 
 - Budget planning and goal setting
+- use CustomHooks for better code organization
 - Enhanced data visualization with more detailed charts and graphs
 - Push notifications for bill reminders and financial tips
 - Dark mode for better user experience
 
 These improvements would provide a more comprehensive and user-friendly experience for managing personal finances.
+
