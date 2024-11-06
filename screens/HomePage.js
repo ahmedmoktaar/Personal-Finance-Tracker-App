@@ -8,6 +8,8 @@ import { useEffect } from "react";
 import { sortDescendingValues } from "../utils/sortDescendingValues";
 import { Picker } from "@react-native-picker/picker";
 import { TotalMoneyForCurrentMonth } from "../utils/calculateTotalMoney";
+import colors from "../constants/colors";
+import Filter from "../components/Filter";
 
 const HomePage = () => {
   // State to manage modal visibility
@@ -16,15 +18,13 @@ const HomePage = () => {
   const [transactions, setTransactions] = useState([]);
   // State to store original transactions for filtering/sorting
   const [originalTransactions, setOriginalTransactions] = useState([]);
-  // State to store the selected filter type
-  const [filterType, setFilterType] = useState("");
-  // State to store the selected sort type
-  const [sortType, setSortType] = useState("");
-
   // Calculate total expense for the current month
-  const totalExpenseForCurrentMonth = TotalMoneyForCurrentMonth(transactions, "expense");
+  const totalExpenseForCurrentMonth = TotalMoneyForCurrentMonth(originalTransactions, "expense");
   // Calculate total income for the current month
-  const totalIncomeForCurrentMonth = TotalMoneyForCurrentMonth(transactions, "income");
+  const totalIncomeForCurrentMonth = TotalMoneyForCurrentMonth(originalTransactions, "income");
+  // State to store selected filter
+  const [selectedFilter, setSelectedFilter] = useState("Most Recent");
+
 
   // Function to handle modal visibility
   const handleModalVisibility = () => {
@@ -51,31 +51,29 @@ const HomePage = () => {
     }
   };
 
-  // Function to handle sorting by date
-  const handleSortByDate = (type) => {
-    setSortType(type);
-    setFilterType("");
-
-    if (type === "ascending") {
-      sortDescendingValues(originalTransactions);
-    } else if (type === "descending") {
-      const sortedValues = originalTransactions.reverse();
-      setTransactions(sortedValues);
-    } else {
-      setTransactions(originalTransactions);
+  // Function to handle filter change
+  const handleFilterChange = (type) => {
+    switch (type) {
+      case "Most Recent":
+        setTransactions(sortDescendingValues(originalTransactions));
+        break;
+      case "Oldest":
+        const sortedValues = originalTransactions.reverse();
+        setTransactions(sortedValues);
+        break;
+      case "Income":
+        const filteredValues = originalTransactions.filter((transaction) => transaction.type === "income");
+        setTransactions(filteredValues);
+        break;
+      case "Expense":
+        const filteredValuesExpense = originalTransactions.filter((transaction) => transaction.type === "expense");
+        setTransactions(filteredValuesExpense);
+        break;
+      default:
+        console.log("No filter selected");
+        break;
     }
-  };
-
-  // Function to handle sorting by type (income/expense)
-  const handleSortByType = (type) => {
-    setFilterType(type);
-    setSortType("");
-    if (type) {
-      const filteredValues = originalTransactions.filter((transaction) => transaction.type === type);
-      setTransactions(filteredValues);
-    } else {
-      setTransactions(originalTransactions);
-    }
+    setSelectedFilter(type);
   };
 
   // Fetch data when the component mounts or modal visibility changes
@@ -84,35 +82,106 @@ const HomePage = () => {
   }, [isModalVisible]);
 
   return (
-    <View>
-      <Text>Welcome to Personal Finance Tracker</Text>
-      <Text>{totalExpenseForCurrentMonth}</Text>
-      <Text>{totalIncomeForCurrentMonth}</Text>
+    <View style={styles.container}>
+      <View style={styles.transactionContainer}>
+        <View style={styles.addTransactionContainer}>
+          <Text style={styles.addTransaction}>Add Transaction</Text>
+          <Ionicons name="add" size={30} color="black" onPress={handleModalVisibility} style={styles.icon} />
+        </View>
 
-      <Ionicons name="add-circle" size={24} color="black" onPress={handleModalVisibility} />
-
-      <Modal visible={isModalVisible} animationType="slide">
-        <Form setIsModalVisible={setIsModalVisible} />
-      </Modal>
-
-      <View>
-        <Text>Filter by Date:</Text>
-        <Picker selectedValue={sortType} onValueChange={handleSortByDate}>
-          <Picker.Item label="ascending" value="ascending" />
-          <Picker.Item label="descending" value="descending" />
-        </Picker>
-        <Text>Filter by Type:</Text>
-        <Picker selectedValue={filterType} onValueChange={handleSortByType}>
-          <Picker.Item label="income" value="income" />
-          <Picker.Item label="expense" value="expense" />
-        </Picker>
+        <View style={styles.totalTextContainer}>
+          <Text style={styles.totalText}>Current Month Total Income:</Text>
+          <Text style={styles.totalMoney}> ${totalIncomeForCurrentMonth}</Text>
+        </View>
+        <View style={styles.totalTextContainer}>
+          <Text style={styles.totalText}>Current Month Total Expense:</Text>
+          <Text style={styles.totalMoney}> ${totalExpenseForCurrentMonth}</Text>
+        </View>
       </View>
 
-      <FlatList data={transactions} renderItem={({ item }) => <Card transaction={item} />} />
+      <Modal visible={isModalVisible} animationType="slide" transparent={true}>
+        <View style={styles.modal}>
+          <Form setIsModalVisible={setIsModalVisible} />
+        </View>
+      </Modal>
+
+      <View style={styles.buttonContainer}>
+        <Filter type="Income" handleFilterChange={handleFilterChange} selectedFilter={selectedFilter} />
+        <Filter type="Expense" handleFilterChange={handleFilterChange} selectedFilter={selectedFilter} />
+        <Filter type="Most Recent" handleFilterChange={handleFilterChange} selectedFilter={selectedFilter} />
+        <Filter type="Oldest" handleFilterChange={handleFilterChange} selectedFilter={selectedFilter} />
+      </View>
+
+      <FlatList data={transactions} renderItem={({ item }) => <Card transaction={item} />} style={styles.flatList} />
     </View>
   );
 };
 
-const styles = StyleSheet.create({});
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: "#fff",
+  },
+  transactionContainer: {
+    backgroundColor: colors.primary,
+    padding: 20,
+  },
+  addTransactionContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 20,
+  },
+  addTransaction: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: "white",
+  },
+  totalTextContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginVertical: 10,
+  },
+  totalText: {
+    fontSize: 16,
+    color: "white",
+  },
+  totalMoney: {
+    fontSize: 30,
+    color: "white",
+    fontWeight: "bold",
+  },
+  icon: {
+    alignSelf: "center",
+    paddingHorizontal: 10,
+    paddingVertical: 10,
+    backgroundColor: "rgba(255, 255, 255, 0.203)",
+    borderWidth: 1,
+    color: "white",
+  },
+  modal: {
+    flex: 1,
+  },
+  flatList: {
+    paddingHorizontal: 20,
+  },
+  buttonContainer: {
+    marginTop: 20,
+    flexDirection: "row",
+    justifyContent: "center",
+    paddingBottom: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f0f0f0',
+  },
+  button: {
+    flex: 1,
+    marginHorizontal: 20,
+    borderRadius: 8,
+    marginVertical: 10,
+    overflow: "hidden",
+    maxWidth: 150,
+  },
+});
 
 export default HomePage;

@@ -175,13 +175,14 @@ const styles = StyleSheet.create({
   },
   buttonContainer: {
     flexDirection: "row",
-    justifyContent: "flex-end",
+    justifyContent: "center",
     flex: 1,
   },
   typeButton: {
     alignItems: "center",
     borderRadius: 5,
     marginBottom: 20,
+    marginHorizontal: 10,
   },
   typeButtonText: {
     padding: 12,
