@@ -1,5 +1,5 @@
 import { StatusBar } from "expo-status-bar";
-import { StyleSheet, Text, View } from "react-native";
+import { StyleSheet } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { NavigationContainer } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
@@ -14,12 +14,13 @@ export default function App() {
       <StatusBar style="auto" />
       <SafeAreaView style={styles.container}>
         <NavigationContainer>
-          <Stack.Navigator  initialRouteName="Home"  screenOptions={{ headerStyle: { backgroundColor: colors.primary }, headerTintColor: "white"}}>
+          <Stack.Navigator initialRouteName="Home" screenOptions={{ headerStyle: { backgroundColor: colors.primary }, headerTintColor: "white" }}>
             <Stack.Screen
               name="Home"
               component={HomePage}
               options={{
-                title: "Personal Finance Tracker App",
+                title: "Finance Tracker App",
+                headerTitleAlign: "center",
               }}
             />
           </Stack.Navigator>
