@@ -25,7 +25,7 @@ const styles = StyleSheet.create({
   },
   typeButtonText: {
     padding: 6,
-    paddingHorizontal: 12,
+    paddingHorizontal: 11,
     fontSize: 13,
   },
   typeButtonSelected: {
